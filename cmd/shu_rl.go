@@ -47,6 +47,8 @@ func main() {
 	router.HandleFunc("/short", ShortHandler)
 	router.HandleFunc("/shortUrl", ShortUrlHandler)
 
+	router.NotFoundHandler = http.HandlerFunc(ErrorHandler)
+
 	// WEB handle
 	http.Handle("/", router)
 
@@ -81,7 +83,7 @@ func ShortUrlHandler(w http.ResponseWriter, r *http.Request) {
 	ShortUrl  := g.GenerateShortUrl()
 
 	if FindSourceUrlInDb(SourceUrl, "no") != "" {
-		rows, err := db.DATABASE.Query("select * from urls where u_id = ?", FindSourceUrlInDb(SourceUrl, "no"))
+		rows, err := db.DATABASE.Query("select * from " + c.DataBaseTable + " where u_id = ?", FindSourceUrlInDb(SourceUrl, "no"))
 
 		for rows.Next() {
 			var id int
@@ -110,7 +112,7 @@ func ShortUrlHandler(w http.ResponseWriter, r *http.Request) {
 		urls[newUrl.Id] = newUrl
 
 		for _, i := range urls {
-			_, err := db.DATABASE.Exec("insert into urls.urls (id, u_id, source_url, short_url) values(NULL, ?, ?, ?)", i.Id, i.SourceUrl, i.NewUrl)
+			_, err := db.DATABASE.Exec("insert into " +  c.DataBaseName + "." + c.DataBaseTable + " (id, u_id, source_url, short_url) values(NULL, ?, ?, ?)", i.Id, i.SourceUrl, i.NewUrl)
 
 			sh = "http://" + c.ServerHost + c.ServerPort + "/s/" + i.NewUrl
 			sc = i.SourceUrl
@@ -128,7 +130,7 @@ func ShortUrlHandler(w http.ResponseWriter, r *http.Request) {
  * This function find "source" in data base and if find then return he
 **/
 func FindSourceUrlInDb(sUrl, findShort string) string {
-	rows, err := db.DATABASE.Query("select * from urls where source_url = ?", sUrl)
+	rows, err := db.DATABASE.Query("select * from " + c.DataBaseTable + " where source_url = ?", sUrl)
 
 	for rows.Next() {
 		var id int
@@ -176,6 +178,16 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = t.ExecuteTemplate(w, "about", nil)
+}
+
+func ErrorHandler(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("./www/tmp/404.html")
+
+	if err != nil {
+		_, _ = fmt.Fprintf(w, err.Error())
+	}
+
+	err = t.ExecuteTemplate(w, "404", nil)
 }
 
 /**
