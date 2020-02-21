@@ -180,6 +180,9 @@ func AboutHandler(w http.ResponseWriter, r *http.Request) {
 	err = t.ExecuteTemplate(w, "about", nil)
 }
 
+/**
+ * Error (404) page handler
+**/
 func ErrorHandler(w http.ResponseWriter, r *http.Request) {
 	t, err := template.ParseFiles("./www/tmp/404.html")
 
