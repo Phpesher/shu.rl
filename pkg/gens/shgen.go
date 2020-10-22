@@ -6,14 +6,14 @@ import (
 )
 
 func GenerateShortUrl() string {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, 8)
 	_, _ = rand.Read(bytes)
 
 	return fmt.Sprintf("%x", bytes)
 }
 
 func GenerateId() string {
-	bytes := make([]byte, 16)
+	bytes := make([]byte, 8)
 	_, _ = rand.Read(bytes)
 
 	return fmt.Sprintf("%x", bytes)
